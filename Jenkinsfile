@@ -24,11 +24,10 @@ pipeline
 			{
                 script
                     {
-                        docker.image('maven:3.9-eclipse-temurin-21').inside(
-                            "-v ${M2_DIR}:/root/.m2 -w /workspace"
-                    )
-                    {
+                        docker.image('maven:3.9-eclipse-temurin-21').inside("-v ${M2_DIR}:/root/.m2 -w /workspace")
+                        {
                         sh 'mvn clean test'
+                        }
                     }
             }
         }
@@ -70,4 +69,5 @@ pipeline
             {
                 echo 'Build or tests failed!'
             }
+    }
     }
