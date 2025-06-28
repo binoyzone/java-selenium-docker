@@ -1,20 +1,27 @@
-pipeline {
+pipeline
+{
     agent any
-        environment {
+        environment
+        {
                 WORKSPACE_DIR = "${env.WORKSPACE}".replaceAll('\\\\', '/')
                 M2_DIR = "${env.USERPROFILE}\\.m2".replaceAll('\\\\', '/')
-            }
+		}
 
 
-    stages {
-        stage('Checkout') {
-            steps {
+    stages
+		{
+        stage('Checkout')
+		{
+            steps
+			{
                 git 'https://github.com/binoyzone/java-selenium-docker'
             }
         }
 
-        stage('Build & Test') {
-            steps {
+        stage('Build & Test')
+		{
+            steps
+			{
                 script
                     {
                         docker.image('maven:3.9-eclipse-temurin-21').inside(
@@ -26,14 +33,18 @@ pipeline {
             }
         }
 
-        stage('Publish JUnit Report') {
-            steps {
+        stage('Publish JUnit Report')
+		{
+            steps
+			{
                 junit '**/target/surefire-reports/*.xml'
             }
         }
 
-        stage('Publish HTML Report') {
-            steps {
+        stage('Publish HTML Report')
+		{
+            steps
+			{
                 publishHTML(target: [
                     reportDir: 'target/surefire-reports',
                     reportFiles: 'index.html',
@@ -41,7 +52,7 @@ pipeline {
                 ])
             }
         }
-
+    }
 
     post
     {
@@ -60,4 +71,3 @@ pipeline {
                 echo 'Build or tests failed!'
             }
     }
-}
