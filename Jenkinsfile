@@ -10,13 +10,13 @@ pipeline
 
     stages
 		{
-        stage('Checkout')
-		{
-            steps
-			{
-                git 'https://github.com/binoyzone/java-selenium-docker.git'
-            }
-        }
+//         stage('Checkout')
+// 		{
+//             steps
+// 			{
+//                 git 'https://github.com/binoyzone/java-selenium-docker.git'
+//             }
+//         }
 
         stage('Build & Test')
 		{
