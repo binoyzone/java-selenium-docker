@@ -1,56 +1,28 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9-eclipse-temurin-21'
-            args '-v $HOME/.m2:/root/.m2'
-        }
-    }
+    agent any
 
     stages {
-        stage('Checkout') {
+        stage('Build Docker Image') {
             steps {
-                git 'https://github.com/binoyzone/java-selenium-docker'
+                sh 'docker build -t selenium-runner .'
             }
         }
 
-        stage('Build & Test') {
+        stage('Run Tests in Docker') {
             steps {
-                sh 'mvn clean test'
+                sh 'docker run --rm -v $PWD:/app selenium-runner'
             }
         }
 
-        stage('Publish JUnit Report') {
+        stage('Publish Reports') {
             steps {
-                junit '**/target/surefire-reports/*.xml'
-            }
-        }
-
-        stage('Publish HTML Report') {
-            steps {
+                junit 'target/surefire-reports/*.xml'
                 publishHTML(target: [
                     reportDir: 'target/surefire-reports',
                     reportFiles: 'index.html',
-                    reportName: 'Test Report'
+                    reportName: 'HTML Report'
                 ])
             }
         }
-    }
-
-    post
-    {
-            always
-            {
-    //             archiveArtifacts artifacts: '**/target/surefire-reports/*.xml', allowEmptyArchive: true
-    //             archiveArtifacts artifacts: 'target/html-report/index.html', allowEmptyArchive: true
-                echo 'Build completed successfully!'
-            }
-            success
-            {
-                echo 'Build and tests completed successfully!'
-            }
-            failure
-            {
-                echo 'Build or tests failed!'
-            }
     }
 }
