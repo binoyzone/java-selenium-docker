@@ -1,28 +1,63 @@
 pipeline {
     agent any
+        environment {
+                WORKSPACE_DIR = "${env.WORKSPACE}".replaceAll('\\\\', '/')
+                M2_DIR = "${env.USERPROFILE}\\.m2".replaceAll('\\\\', '/')
+            }
+
 
     stages {
-        stage('Build Docker Image') {
+        stage('Checkout') {
             steps {
-                sh 'docker build -t selenium-runner .'
+                git 'https://github.com/binoyzone/java-selenium-docker'
             }
         }
 
-        stage('Run Tests in Docker') {
+        stage('Build & Test') {
             steps {
-                sh 'docker run --rm -v $PWD:/app selenium-runner'
+                script
+                    {
+                        docker.image('maven:3.9-eclipse-temurin-21').inside(
+                            "-v ${M2_DIR}:/root/.m2 -w /workspace"
+                    )
+                    {
+                        sh 'mvn clean test'
+                    }
             }
         }
 
-        stage('Publish Reports') {
+        stage('Publish JUnit Report') {
             steps {
-                junit 'target/surefire-reports/*.xml'
+                junit '**/target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Publish HTML Report') {
+            steps {
                 publishHTML(target: [
                     reportDir: 'target/surefire-reports',
                     reportFiles: 'index.html',
-                    reportName: 'HTML Report'
+                    reportName: 'Test Report'
                 ])
             }
         }
+    }
+
+    post
+    {
+            always
+            {
+    //             archiveArtifacts artifacts: '**/target/surefire-reports/*.xml', allowEmptyArchive: true
+    //             archiveArtifacts artifacts: 'target/html-report/index.html', allowEmptyArchive: true
+                echo 'Build completed successfully!'
+            }
+            success
+            {
+                echo 'Build and tests completed successfully!'
+            }
+            failure
+            {
+                echo 'Build or tests failed!'
+            }
     }
 }
