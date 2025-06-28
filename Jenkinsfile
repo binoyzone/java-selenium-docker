@@ -14,7 +14,7 @@ pipeline
 		{
             steps
 			{
-                git 'https://github.com/binoyzone/java-selenium-docker'
+                git 'https://github.com/binoyzone/java-selenium-docker.git'
             }
         }
 
